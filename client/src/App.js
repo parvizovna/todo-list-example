@@ -50,21 +50,25 @@ const App = () => {
     try {
       setError(null);
 
-      let updatedTodo;
-
-      // Если задача отмечается как выполненная, используем новый эндпоинт
-      if (completed) {
-        updatedTodo = await TodoAPI.markAsDone(id);
-      } else {
-        // Если задача отмечается как невыполненная, используем старый эндпоинт
-        updatedTodo = await TodoAPI.update(id, { completed });
-      }
+      const updatedTodo = await TodoAPI.update(id, { completed });
 
       // Обновляем список задач
       setTodos(todos.map((todo) => (todo.id === id ? updatedTodo : todo)));
     } catch (error) {
       console.error("Ошибка при обновлении задачи:", error);
       setError("Не удалось обновить задачу. Пожалуйста, попробуйте позже.");
+    }
+  };
+
+  const handlePriorityChange = async (id, priority) => {
+    try {
+      setError(null);
+
+      const updatedTodo = await TodoAPI.update(id, { priority });
+      setTodos(todos.map((todo) => (todo.id === id ? updatedTodo : todo)));
+    } catch (error) {
+      console.error("Ошибка при изменении приоритета:", error);
+      setError("Не удалось изменить приоритет. Попробуйте позже.");
     }
   };
 
@@ -83,7 +87,11 @@ const App = () => {
         <div className="loading">Загрузка задач</div>
       ) : (
         /* Список задач */
-        <TodoList todos={todos} onToggleComplete={handleToggleComplete} />
+        <TodoList
+          todos={todos}
+          onToggleComplete={handleToggleComplete}
+          onPriorityChange={handlePriorityChange}
+        />
       )}
     </div>
   );

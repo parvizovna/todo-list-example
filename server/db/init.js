@@ -38,10 +38,10 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
     // Добавляем тестовые данные
     const insertSql = `
-      INSERT INTO todos (title, completed) VALUES 
-      ('Изучить Node.js', 0),
-      ('Изучить React', 0),
-      ('Создать todo-list приложение', 0)
+      INSERT INTO todos (title, completed, priority) VALUES 
+      ('Изучить Node.js', 0, 'high'),
+      ('Изучить React', 0, 'medium'),
+      ('Создать todo-list приложение', 0, 'low')
     `;
 
     db.exec(insertSql, (err) => {

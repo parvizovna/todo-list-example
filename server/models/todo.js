@@ -68,16 +68,16 @@ const Todo = {
    */
   create: (todo) => {
     return new Promise((resolve, reject) => {
-      const { title } = todo;
+      const { title, priority = "medium" } = todo;
 
       if (!title) {
         reject(new Error("Название задачи обязательно"));
         return;
       }
 
-      const sql = "INSERT INTO todos (title) VALUES (?)";
+      const sql = "INSERT INTO todos (title, priority) VALUES (?, ?)";
 
-      db.run(sql, [title], function (err) {
+      db.run(sql, [title, priority], function (err) {
         if (err) {
           reject(err);
           return;
@@ -98,21 +98,28 @@ const Todo = {
    */
   update: (id, updates) => {
     return new Promise((resolve, reject) => {
-      const { completed } = updates;
+      const fields = [];
+      const values = [];
 
-      if (completed === undefined) {
+      if (updates.completed !== undefined) {
+        fields.push("completed = ?");
+        values.push(updates.completed ? 1 : 0);
+      }
+
+      if (updates.priority !== undefined) {
+        fields.push("priority = ?");
+        values.push(updates.priority);
+      }
+
+      if (fields.length === 0) {
         reject(new Error("Нет данных для обновления"));
         return;
       }
 
-      // Преобразуем boolean в 0/1 для SQLite
-      const completedValue = completed ? 1 : 0;
+      const sql = `UPDATE todos SET ${fields.join(", ")} WHERE id = ?`;
+      values.push(id);
 
-      const sql = `UPDATE todos SET completed = ${completedValue}  WHERE id = ${id}`;
-
-      console.log(">>>", id, updates);
-
-      db.run(sql, [], function (err) {
+      db.run(sql, values, function (err) {
         if (err) {
           reject(err);
           return;

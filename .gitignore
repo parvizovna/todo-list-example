@@ -16,6 +16,7 @@ yarn-error.log*
 
 # База данных SQLite
 /data/*.db
+bot/*.db
 
 # Переменные окружения
 .env

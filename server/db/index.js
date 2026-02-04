@@ -11,6 +11,62 @@ if (!fs.existsSync(dataDir)) {
 // Путь к файлу базы данных
 const dbPath = path.join(dataDir, "todos.db");
 
+const seedTodos = () => {
+  const checkSql = "SELECT COUNT(*) AS count FROM todos";
+  db.get(checkSql, [], (countErr, row) => {
+    if (countErr) {
+      console.error("Ошибка при проверке количества задач:", countErr.message);
+      return;
+    }
+
+    if (row.count === 0) {
+      const seedSql = `
+        INSERT INTO todos (title, completed, priority) VALUES
+        ('Изучить Node.js', 0, 'high'),
+        ('Изучить React', 0, 'medium'),
+        ('Создать todo-list приложение', 0, 'low')
+      `;
+
+      db.exec(seedSql, (seedErr) => {
+        if (seedErr) {
+          console.error("Ошибка при добавлении тестовых данных:", seedErr.message);
+        } else {
+          console.log("Тестовые задачи добавлены автоматически");
+        }
+      });
+    }
+  });
+};
+
+const ensurePriorityColumn = (callback) => {
+  const infoSql = "PRAGMA table_info(todos)";
+  db.all(infoSql, [], (infoErr, columns) => {
+    if (infoErr) {
+      console.error("Ошибка при получении схемы таблицы:", infoErr.message);
+      callback();
+      return;
+    }
+
+    const hasPriority = columns.some((column) => column.name === "priority");
+
+    if (hasPriority) {
+      callback();
+      return;
+    }
+
+    const alterSql =
+      "ALTER TABLE todos ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'";
+    db.exec(alterSql, (alterErr) => {
+      if (alterErr) {
+        console.error("Ошибка при добавлении столбца priority:", alterErr.message);
+      } else {
+        console.log("Столбец priority добавлен");
+      }
+      callback();
+    });
+  });
+};
+
 // Создаем подключение к базе данных
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
@@ -22,11 +78,12 @@ const db = new sqlite3.Database(dbPath, (err) => {
     const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
 
     // Выполняем SQL запрос для создания таблицы
-    db.exec(schema, (err) => {
-      if (err) {
-        console.error("Ошибка при создании таблицы:", err.message);
+    db.exec(schema, (schemaErr) => {
+      if (schemaErr) {
+        console.error("Ошибка при создании таблицы:", schemaErr.message);
       } else {
         console.log("Таблица todos создана или уже существует");
+        ensurePriorityColumn(seedTodos);
       }
     });
   }

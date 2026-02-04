@@ -1,7 +1,7 @@
 /**
  * Компонент для отображения списка задач
  */
-const TodoList = ({ todos, onToggleComplete }) => {
+const TodoList = ({ todos, onToggleComplete, onPriorityChange }) => {
   // Если задач нет, показываем сообщение
   if (!todos || todos.length === 0) {
     return (
@@ -18,6 +18,7 @@ const TodoList = ({ todos, onToggleComplete }) => {
           key={todo.id}
           todo={todo}
           onToggleComplete={onToggleComplete}
+          onPriorityChange={onPriorityChange}
         />
       ))}
     </ul>

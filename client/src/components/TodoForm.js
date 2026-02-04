@@ -3,6 +3,7 @@
  */
 const TodoForm = ({ onAddTodo }) => {
   const [title, setTitle] = React.useState("");
+  const [priority, setPriority] = React.useState("medium");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -10,10 +11,11 @@ const TodoForm = ({ onAddTodo }) => {
     // Проверяем, что название задачи не пустое
     if (title.trim()) {
       // Вызываем функцию добавления задачи
-      onAddTodo({ title });
+      onAddTodo({ title, priority });
 
       // Очищаем поле ввода
       setTitle("");
+      setPriority("medium");
     }
   };
 
@@ -26,6 +28,15 @@ const TodoForm = ({ onAddTodo }) => {
         placeholder="Введите название задачи"
         required
       />
+      <select
+        value={priority}
+        onChange={(e) => setPriority(e.target.value)}
+        aria-label="Приоритет задачи"
+      >
+        <option value="high">Высокий</option>
+        <option value="medium">Средний</option>
+        <option value="low">Низкий</option>
+      </select>
       <button type="submit">Добавить</button>
     </form>
   );
